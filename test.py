@@ -22,18 +22,14 @@ mask = mask['mask']
 mask = np.squeeze(mask[:,:,:,0])
 CSr, img_h, img_w = mask.shape
 mask = torch.from_numpy(mask).float()
-mask = torch.unsqueeze(mask, 0).repeat(batch_size, 1, 1, 1)
 
 #temp for visualization
 mask_temp = mask.detach().numpy()
-mask_temp = np.squeeze(mask_temp[0, :, :, :])
 mask_sum = np.sum(mask_temp, axis=0)
 mask_sumv = np.reshape(mask_sum, (img_h*img_w, 1))
 zero_ind = np.where(mask_sumv==0)[0].tolist()
 mask_sumv[zero_ind]=np.Inf
 mask_sum = np.reshape(mask_sumv, (img_h, img_w))
-mask_sum = np.expand_dims(mask_sum, axis=0)
-mask_sum = np.repeat(mask_sum, batch_size, axis=0)
 ##################################################
 model = GAPNet().to(device)
 # model = GAPNet2(n_stage=13).to(device)
@@ -49,7 +45,7 @@ optimizer.load_state_dict(checkpoint['optim_state'])
 model.eval()
 
 mask = mask.to(device)
-HHt = torch.sum(mask, dim=1, keepdim=False) / (CSr ** 2)
+HHt = torch.sum(mask, dim=0, keepdim=False) / (CSr ** 2)
 HHt = HHt.to(device)
 
 
@@ -74,6 +70,8 @@ for i, (inputs, gts) in enumerate(data_loaded):
     inputs = inputs.detach().numpy()
     
     # temp for visualization
+    mask_sum = np.expand_dims(mask_sum, axis=0)
+    mask_sum = np.repeat(mask_sum, inputs.shape[0], axis=0)
     HHt_inv_y = inputs / mask_sum
 
     # for j in range(0, batch_size):
@@ -87,16 +85,16 @@ for i, (inputs, gts) in enumerate(data_loaded):
         for j in range(0, CSr):
             plt.figure(figsize=(20.48, 20.48))
             plt.subplot(1,4,1)
-            plt.imshow(np.squeeze(outputs[i, j, :, :]), cmap='gray')
+            plt.imshow(np.squeeze((outputs[i, j, :, :])), cmap='gray')
             plt.title('reconstruction')
             plt.subplot(1,4,2)
-            plt.imshow(np.squeeze(gts[i, j, :, :]), cmap='gray')
+            plt.imshow(np.squeeze((gts[i, j, :, :])), cmap='gray')
             plt.title('ground truth')
             plt.subplot(1,4,3)
-            plt.imshow(np.squeeze(inputs[i, :, :]), cmap='gray')
+            plt.imshow(np.squeeze((inputs[i, :, :])), cmap='gray')
             plt.title('measurement')
             plt.subplot(1,4,4)
-            plt.imshow(np.squeeze(HHt_inv_y[i, :, :]), cmap='gray')
+            plt.imshow(np.squeeze((HHt_inv_y[i, :, :])), cmap='gray')
             plt.title('HHt_inv * y')
             plt.show()
 

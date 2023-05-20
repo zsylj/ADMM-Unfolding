@@ -20,6 +20,9 @@ def Inspection(dir):
     img_dir_list = []
     len_list = []
     shape_list = []
+    length = 0
+    length1 = 0
+    length2 = 0
     ind = 0
     for folder in folder_list:
         sub_dir = os.path.join(dir, folder)
@@ -35,14 +38,25 @@ def Inspection(dir):
             img_dir_list.append(img_name_list2)
 
             len_list.append(len(img_name_list))
+
+            length_folder = len(img_name_list)
+            length_folder1 = len(img_name_list) - 7
+            length_folder2 = int(len(img_name_list) / 8)
             
             img = Image.open(os.path.join(sub_dir, img_name_list[0]))
             img = np.array(img)
             img = img/255.0
 
+
             shape_list.append(img.shape)
             print(f'No.{ind:2d} {sub_dir:65s} {len(img_name_list):3d} {img.shape}')
             ind = ind+1
+        length = length + length_folder
+        length1 = length1 + length_folder1
+        length2 = length2 + length_folder2
+    print(f'Total Number of Files: {length}')
+    print(f'Overlapped files: {length1}')
+    print(f'None overlap files: {length2}')
     return folder_list, img_dir_list, len_list, shape_list
 
 folder_list, img_dir_list, len_list, shape_list = Inspection(dir)

@@ -23,11 +23,12 @@ data_loaded = DataLoader(dataset=dataset, batch_size=batch_size, num_workers=4)
 #     print(inputs.shape)
 #     print(gts.shape)
 #     for i in range(0, batch_size):
+#         plt.figure(figsize=(20.48, 20.48))
 #         plt.subplot(3,3,1)
-#         plt.imshow(np.squeeze(inputs[i, :, :]), cmap='gray')
+#         plt.imshow(np.squeeze((inputs[i, :, :])), cmap='gray')
 #         for j in range(0, CSr):    
 #             plt.subplot(3,3,j+2)
-#             plt.imshow(np.squeeze(gts[i, j, :, :]), cmap='gray')
+#             plt.imshow(np.squeeze((gts[i, j, :, :])), cmap='gray')
 #         plt.show()
 
 mask = scipy.io.loadmat('/home/zhangshiyu/GAP/Mask_r0.5.mat')
@@ -35,7 +36,7 @@ mask = mask['mask']
 mask = np.squeeze(mask[:,:,:,0])
 CSr, img_h, img_w = mask.shape
 mask = torch.from_numpy(mask).float()
-mask = torch.unsqueeze(mask, 0).repeat(batch_size, 1, 1, 1)
+# mask = torch.unsqueeze(mask, 0).repeat(batch_size, 1, 1, 1)
 ##############################################
 model = GAPNet().to(device)
 # model = GAPNet2(n_stage=13).to(device)
@@ -51,7 +52,7 @@ n_iter = len(data_loaded)
 
 mask = mask.to(device)
 
-HHt = torch.sum(mask, dim=1, keepdim=False) / (CSr**2)
+HHt = torch.sum(mask, dim=0, keepdim=False) / (CSr**2)
 HHt = HHt.to(device)
 # tau = torch.tensor([0.01]).to(device)
 
@@ -73,13 +74,13 @@ for epoch in range(n_epochs):
         outputs = model(inputs, mask, HHt)
 
         loss = myloss(outputs, gts)
-        psnr = -10 * torch.log10(loss)
+        psnr = -10 * np.log10(loss.item())
 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        logging.info(f'Epoch {epoch+1:4d}/{n_epochs:4d}, Step {i+1:5d}/{n_iter:5d}, Loss = {loss.item():.8f}, Batch_PSNR = {psnr:.8f}')
+        logging.info(f'Epoch {epoch+1:4d}/{n_epochs:4d}, Step {i+1:5d}/{n_iter:5d}, Loss = {loss.item():.8f}, PSNR = {psnr:.8f}')
 
         batch_loss_list.append(loss.item())
         batch_psnr_list.append(psnr)

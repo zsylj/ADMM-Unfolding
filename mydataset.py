@@ -22,13 +22,20 @@ class DAVISDataset(Dataset):
             # print(video_dir)
             img_name_list = os.listdir(video_dir)
             img_name_list.sort(key = lambda x:int(x[:-4]))
-            for i in  range(0, len(img_name_list) - self.CSr):
+            for i in  range(0, len(img_name_list) - self.CSr + 1):
                 sub_data_path = img_name_list[i : i + self.CSr]
                 sub_dir_path = []
                 for item in sub_data_path:
                     item = os.path.join(video_dir, item)
                     sub_dir_path.append(item)
-                    self.data_dir_list.append(sub_dir_path)
+                self.data_dir_list.append(sub_dir_path)
+                self.data_dir_list.append(sub_dir_path) #rot090
+                self.data_dir_list.append(sub_dir_path) #rot180
+                self.data_dir_list.append(sub_dir_path) #rot270
+                self.data_dir_list.append(sub_dir_path) #flp000
+                self.data_dir_list.append(sub_dir_path) #flp090
+                self.data_dir_list.append(sub_dir_path) #flp180
+                self.data_dir_list.append(sub_dir_path) #flp270
         print(f'Total number of samples = {len(self.data_dir_list)}')
 
     def __getitem__(self, index):
@@ -46,8 +53,28 @@ class DAVISDataset(Dataset):
             img = np.array(img)
             img = img/255.0
 
-            imgs[i, :, :, :] = img
-        imgs = imgs.transpose(0, 3, 1, 2)
+            if index % 8 == 0:
+                imgs[i, :, :] = img
+            elif index % 8 ==1:
+                imgs[i, :, :] = np.rot90(img, k=1)
+            elif index % 8 ==2:
+                imgs[i, :, :] = np.rot90(img, k=2)
+            elif index % 8 ==3:
+                imgs[i, :, :] = np.rot90(img, k=3)
+            elif index % 8 ==4:
+                img = np.fliplr(img)
+            elif index % 8 ==5:
+                img = np.fliplr(img)
+                imgs[i, :, :] = np.rot90(img, k=1)
+            elif index % 8 ==6:
+                img = np.fliplr(img)
+                imgs[i, :, :] = np.rot90(img, k=2)
+            elif index % 8 ==7:
+                img = np.fliplr(img)
+                imgs[i, :, :] = np.rot90(img, k=3)
+
+        imgs = imgs
+        # imgs = imgs.transpose(0, 3, 1, 2) #color
         # shape of gts (batch), CSr, img_c, img_h, img_w
 
         measurement = np.sum(np.multiply(imgs, self.mask), axis=0) / self.CSr
@@ -58,7 +85,7 @@ class DAVISDataset(Dataset):
     def __len__(self,):
         return len(self.data_dir_list)
 
-#Overlapped, None Augmentation
+# None Overlap, Augmentated
 class lightDAVISDataset(Dataset):
     def __init__(self, folder_dir, mask_dir):
         # self.folder_dir = folder_dir
@@ -83,7 +110,14 @@ class lightDAVISDataset(Dataset):
                 for item in sub_data_path:
                     item = os.path.join(video_dir, item)
                     sub_dir_path.append(item)
-                    self.data_dir_list.append(sub_dir_path)
+                self.data_dir_list.append(sub_dir_path)
+                self.data_dir_list.append(sub_dir_path) #rot090
+                self.data_dir_list.append(sub_dir_path) #rot180
+                self.data_dir_list.append(sub_dir_path) #rot270
+                self.data_dir_list.append(sub_dir_path) #flp000
+                self.data_dir_list.append(sub_dir_path) #flp090
+                self.data_dir_list.append(sub_dir_path) #flp180
+                self.data_dir_list.append(sub_dir_path) #flp270
         print(f'Total number of samples = {len(self.data_dir_list)}')
 
     def __getitem__(self, index):
@@ -101,8 +135,28 @@ class lightDAVISDataset(Dataset):
             img = np.array(img)
             img = img/255.0
 
-            imgs[i, :, :, :] = img
-        imgs = imgs.transpose(0, 3, 1, 2)
+            if index % 8 == 0:
+                imgs[i, :, :] = img
+            elif index % 8 ==1:
+                imgs[i, :, :] = np.rot90(img, k=1)
+            elif index % 8 ==2:
+                imgs[i, :, :] = np.rot90(img, k=2)
+            elif index % 8 ==3:
+                imgs[i, :, :] = np.rot90(img, k=3)
+            elif index % 8 ==4:
+                img = np.fliplr(img)
+            elif index % 8 ==5:
+                img = np.fliplr(img)
+                imgs[i, :, :] = np.rot90(img, k=1)
+            elif index % 8 ==6:
+                img = np.fliplr(img)
+                imgs[i, :, :] = np.rot90(img, k=2)
+            elif index % 8 ==7:
+                img = np.fliplr(img)
+                imgs[i, :, :] = np.rot90(img, k=3)
+
+        imgs = imgs  #grayscale
+        #imgs = imgs.transpose(0, 3, 1, 2) #color
         # shape of gts (batch), CSr, img_c, img_h, img_w
 
         measurement = np.sum(np.multiply(imgs, self.mask), axis=0) / self.CSr
@@ -114,7 +168,7 @@ class lightDAVISDataset(Dataset):
         return len(self.data_dir_list)
 
 
-#None Overlapp, None Augmentation
+# Center Frames, Augmentated
 class miniDAVISDataset(Dataset):
     def __init__(self, folder_dir, mask_dir):
         # self.folder_dir = folder_dir
@@ -137,7 +191,14 @@ class miniDAVISDataset(Dataset):
             for item in sub_data_path:
                 item = os.path.join(video_dir, item)
                 sub_dir_path.append(item)
-                self.data_dir_list.append(sub_dir_path)
+            self.data_dir_list.append(sub_dir_path) #rot000
+            self.data_dir_list.append(sub_dir_path) #rot090
+            self.data_dir_list.append(sub_dir_path) #rot180
+            self.data_dir_list.append(sub_dir_path) #rot270
+            self.data_dir_list.append(sub_dir_path) #flp000
+            self.data_dir_list.append(sub_dir_path) #flp090
+            self.data_dir_list.append(sub_dir_path) #flp180
+            self.data_dir_list.append(sub_dir_path) #flp270
         print(f'Total number of samples = {len(self.data_dir_list)}')
 
     def __getitem__(self, index):
@@ -157,7 +218,25 @@ class miniDAVISDataset(Dataset):
             img = np.array(img)
             img = img/255.0
 
-            imgs[i, :, :] = img
+            if index % 8 == 0:
+                imgs[i, :, :] = img
+            elif index % 8 ==1:
+                imgs[i, :, :] = np.rot90(img, k=1)
+            elif index % 8 ==2:
+                imgs[i, :, :] = np.rot90(img, k=2)
+            elif index % 8 ==3:
+                imgs[i, :, :] = np.rot90(img, k=3)
+            elif index % 8 ==4:
+                img = np.fliplr(img)
+            elif index % 8 ==5:
+                img = np.fliplr(img)
+                imgs[i, :, :] = np.rot90(img, k=1)
+            elif index % 8 ==6:
+                img = np.fliplr(img)
+                imgs[i, :, :] = np.rot90(img, k=2)
+            elif index % 8 ==7:
+                img = np.fliplr(img)
+                imgs[i, :, :] = np.rot90(img, k=3)
             # imgs[i, :, :, :] = img
 
         imgs = imgs #grayscale

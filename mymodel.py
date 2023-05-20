@@ -137,42 +137,44 @@ class GAPNet(nn.Module):
     # def forward(self, y, mask, HtH, v, lmbd):
     def forward(self, y, mask, HHt):       
 
+        Phi = torch.unsqueeze(mask, 0).repeat(y.shape[0], 1, 1, 1)
+        HHt = torch.unsqueeze(HHt, 0).repeat(y.shape[0], 1, 1)
 
-        v = torch.zeros_like(mask)
-        lmbd = torch.zeros_like(mask)
+        v = torch.zeros_like(Phi)
+        lmbd = torch.zeros_like(Phi)
 
         theta01 = self.tau01 * v + lmbd
-        temp01 = At(y, mask) + theta01
+        temp01 = At(y, Phi) + theta01
         denom01 = HHt + self.tau01
-        x = (temp01 - At(torch.div(A(temp01, mask) ,denom01), mask)) / self.tau01
+        x = (temp01 - At(torch.div(A(temp01, Phi) ,denom01), Phi)) / self.tau01
         v = self.myNet01(x)
         lmbd = lmbd - (x - v)
 
         theta02 = self.tau02 * v + lmbd
-        temp02 = At(y, mask) + theta02
+        temp02 = At(y, Phi) + theta02
         denom02 = HHt + self.tau02
-        x = (temp02 - At(torch.div(A(temp02, mask) ,denom02), mask)) / self.tau02
+        x = (temp02 - At(torch.div(A(temp02, Phi) ,denom02), Phi)) / self.tau02
         v = self.myNet02(x)
         lmbd = lmbd - (x - v)
 
         theta03 = self.tau03 * v + lmbd
-        temp03 = At(y, mask) + theta03
+        temp03 = At(y, Phi) + theta03
         denom03 = HHt + self.tau03
-        x = (temp03 - At(torch.div(A(temp03, mask) ,denom03), mask)) / self.tau03
+        x = (temp03 - At(torch.div(A(temp03, Phi) ,denom03), Phi)) / self.tau03
         v = self.myNet03(x)
         lmbd = lmbd - (x - v)
         
         theta04 = self.tau04 * v + lmbd
-        temp04 = At(y, mask) + theta04
+        temp04 = At(y, Phi) + theta04
         denom04 = HHt + self.tau04
-        x = (temp04 - At(torch.div(A(temp04, mask) ,denom04), mask)) / self.tau04
+        x = (temp04 - At(torch.div(A(temp04, Phi) ,denom04), Phi)) / self.tau04
         v = self.myNet04(x)
         lmbd = lmbd - (x - v)
 
         theta05 = self.tau05 * v + lmbd
-        temp05 = At(y, mask) + theta05
+        temp05 = At(y, Phi) + theta05
         denom05 = HHt + self.tau05
-        x = (temp05 - At(torch.div(A(temp05, mask) ,denom05), mask)) / self.tau05
+        x = (temp05 - At(torch.div(A(temp05, Phi) ,denom05), Phi)) / self.tau05
         v = self.myNet05(x)
         lmbd = lmbd - (x - v)
 

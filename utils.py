@@ -3,15 +3,15 @@ import torch
 import matplotlib.pyplot as plt
 
 
-def A(x,Phi):
-    temp = x*Phi
-    y = torch.sum(temp,1) / Phi.shape[1]
-    return y
+def A(input, Phi):
+    temp = input * Phi
+    out = torch.sum(temp,1) / Phi.shape[1]
+    return out
 
-def At(y,Phi):
-    temp = torch.unsqueeze(y, 1).repeat(1,Phi.shape[1],1,1)
-    x = temp*Phi / Phi.shape[1]
-    return x
+def At(input, Phi):
+    temp = torch.unsqueeze(input, 1).repeat(1,Phi.shape[1],1,1)
+    out = temp * Phi / Phi.shape[1]
+    return out
 
 def get_logger(filename, verbosity=1, name=None):
     level_dict = {0: logging.DEBUG, 1: logging.INFO, 2: logging.WARNING}
